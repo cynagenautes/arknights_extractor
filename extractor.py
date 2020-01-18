@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*- 
 import shutil
 import time
 import cv2
@@ -20,34 +19,40 @@ def Do(a, b):
     a[:,:,3] = b[:,:,0]
     return a
 
-print("提取图片/合成立绘？1/2")
+print("ファイルパス等設定(初回)/立ち絵抽出実行 1/2")
 a = input()
 if a == '1':
     file_list = os.listdir("./Input")
-    print("共%d个图片：" %len(file_list))
-    print('begin')
+    print("%d件のファイルが見つかりました" %len(file_list))
+    print('Start')
     for i in file_list:
         img = cv2.imread("./Input/" + i, cv2.IMREAD_UNCHANGED)
         if img is not None and img.shape[0] > 512:
             if '#' in i:
-                i2 = i.replace(i[i.find('#'):], '#1[alpha].png')
-                i3 = i.replace(i[i.find('#'):], '#1.png')
+                if "[alpha]" in i:
+                    i2 = i.replace(i[i.find('#'):], '#1[alpha].png')
+                    shutil.copy("./Input/" + i, "./Texture2D_B/" + i2)
+                    os.remove("./Input/" + i)                   
+                else:
+                    i2 = i.replace(i[i.find('#'):], '#1.png')
+                    shutil.copy("./Input/" + i, "./Texture2D_A/" + i2)
+                    os.remove("./Input/" + i)
             else:
                 i2 = i.replace(".png", '[alpha].png')
                 i3 = i
-            if i2 in file_list:
+
                 shutil.copy("./Input/" + i, "./Texture2D_A/" + i3)
                 os.remove("./Input/" + i)
                 shutil.copy("./Input/" + i2, "./Texture2D_B/" + i2)
                 os.remove("./Input/" + i2)
-    print('over')
+    print("完了")
     os.system('pause')
 if a == '2':
     file_list = os.listdir("./Texture2D_A")
-    print("待合成%d个图片：" %len(file_list))
+    print("%d件のファイルを処理中" %len(file_list))
 
     for i in file_list:
-        print('正在处理%s' %i)
+        print('%sを処理中' %i)
         time_start = time.time()
         i2 = i.replace(".png", '[Alpha].png')
         a = read_png('./Texture2D_A/' + i)
@@ -58,6 +63,6 @@ if a == '2':
         shutil.copy("./Texture2D_A/" + i, "./Used/" + i)
         os.remove("./Texture2D_A/" + i)
         time_end = time.time()
-        print("耗时 %f s" %(time_end-time_start))
+        print("完了 %f s" %(time_end-time_start))
     print('over')
     os.system('pause')
